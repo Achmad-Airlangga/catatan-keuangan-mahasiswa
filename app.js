@@ -1,113 +1,46 @@
 /**
- * DompetKampus - Aplikasi Catatan Keuangan Mahasiswa
- * Logic, State Management, Local Storage, & DOM Handling
+ * SisaBerapa? 💸 — Catatan Keuangan Mahasiswa Anti-Bokek
+ * Logic, State Management, Lucide Icons & Micro-Interactions
  */
 
 // =============================================================================
 // Constants & Configuration
 // =============================================================================
 
-const STORAGE_KEY = 'dompet_kampus_data_v1';
-const THEME_STORAGE_KEY = 'dompet_kampus_theme';
+const STORAGE_KEY = 'sisaberapa_keuangan_mahasiswa_v1';
+const THEME_STORAGE_KEY = 'sisaberapa_theme';
 
-// Kategori Mahasiswa dengan Ikon & Warna
+// Kategori Mahasiswa dengan Ikon Lucide & Warna
 const CATEGORIES = {
   expense: [
-    { id: 'makan', label: 'Makanan & Minuman', icon: '🍲', color: '#f97316' },
-    { id: 'kos', label: 'Kos & Tempat Tinggal', icon: '🏠', color: '#6366f1' },
-    { id: 'kuliah', label: 'Kebutuhan Kuliah & Buku', icon: '📚', color: '#3b82f6' },
-    { id: 'transport', label: 'Transportasi & Bensin', icon: '🛵', color: '#06b6d4' },
-    { id: 'internet', label: 'Pulsa & Internet Nugas', icon: '📶', color: '#8b5cf6' },
-    { id: 'nongkrong', label: 'Hiburan & Nongkrong', icon: '☕', color: '#ec4899' },
-    { id: 'pribadi', label: 'Belanja & Laundry', icon: '🛍️', color: '#14b8a6' },
-    { id: 'kesehatan', label: 'Kesehatan & Obat', icon: '💊', color: '#ef4444' },
-    { id: 'lainnya_keluar', label: 'Pengeluaran Lainnya', icon: '📦', color: '#64748b' }
+    { id: 'makan', label: 'Makan & Minum Warteg/Kantin', lucideIcon: 'utensils', color: '#f97316' },
+    { id: 'kos', label: 'Bayar Kosan & Listrik', lucideIcon: 'home', color: '#8b5cf6' },
+    { id: 'kuliah', label: 'Fotokopi, Diktat & Buku', lucideIcon: 'book-open', color: '#3b82f6' },
+    { id: 'nongkrong', label: 'Kopi Nugas & Nongkrong', lucideIcon: 'coffee', color: '#ec4899' },
+    { id: 'transport', label: 'Bensin Motor, KRL & Ojol', lucideIcon: 'bike', color: '#06b6d4' },
+    { id: 'internet', label: 'Paket Data & Wifi Kos', lucideIcon: 'wifi', color: '#a855f7' },
+    { id: 'pribadi', label: 'Laundry & Kebutuhan Kos', lucideIcon: 'shopping-bag', color: '#14b8a6' },
+    { id: 'kesehatan', label: 'Obat, Tolak Angin & Vitamin', lucideIcon: 'pill', color: '#ef4444' },
+    { id: 'lainnya_keluar', label: 'Jajan / Pengeluaran Lainnya', lucideIcon: 'tag', color: '#64748b' }
   ],
   income: [
-    { id: 'ortu', label: 'Uang Saku / Kiriman Ortu', icon: '💸', color: '#10b981' },
-    { id: 'beasiswa', label: 'Beasiswa Kuliah', icon: '🎓', color: '#38bdf8' },
-    { id: 'freelance', label: 'Gaji Freelance / Side Job', icon: '💻', color: '#8b5cf6' },
-    { id: 'asisten', label: 'Honor Asisten Lab / Dosen', icon: '🔬', color: '#6366f1' },
-    { id: 'bisnis', label: 'Jastip / Jualan Mahasiswa', icon: '🤝', color: '#f59e0b' },
-    { id: 'lomba', label: 'Hadiah Lomba / Hibah', icon: '🏆', color: '#eab308' },
-    { id: 'lainnya_masuk', label: 'Pemasukan Lainnya', icon: '💰', color: '#14b8a6' }
+    { id: 'ortu', label: 'Uang Saku / Kiriman Ortu', lucideIcon: 'wallet', color: '#10b981' },
+    { id: 'beasiswa', label: 'Pencairan Beasiswa Kampus', lucideIcon: 'graduation-cap', color: '#38bdf8' },
+    { id: 'freelance', label: 'Gaji Freelance / Side-Job', lucideIcon: 'laptop', color: '#8b5cf6' },
+    { id: 'asisten', label: 'Honor Asisten Lab / Dosen', lucideIcon: 'flask-conical', color: '#6366f1' },
+    { id: 'bisnis', label: 'Jastip & Jualan Mahasiswa', lucideIcon: 'store', color: '#f59e0b' },
+    { id: 'lomba', label: 'Hadiah Lomba / Hibah PKM', lucideIcon: 'award', color: '#eab308' },
+    { id: 'lainnya_masuk', label: 'Duit Masuk Lainnya', lucideIcon: 'coins', color: '#14b8a6' }
   ]
 };
 
-// Quotes & Tips Keuangan Mahasiswa
+// Quotes & Tips Keuangan Santai Khas Mahasiswa
 const STUDENT_QUOTES = [
-  "Makan teratur di warteg boleh, tapi sisihkan tabungan darurat sebelum akhir bulan!",
-  "Catat setiap fotokopi dan beli bensin. Pengeluaran kecil yang bocor halus bisa bikin dompet kempes!",
-  "Gunakan fasilitas wifi kampus dan perpustakaan untuk menghemat kuota internet serta buku.",
-  "Aturan 50/30/20: 50% kebutuhan pokok, 30% tabungan/investasi, 20% nongkrong & hobi.",
-  "Belanja kebutuhan kos sekaligus dalam ukuran besar bersama teman kos untuk harga grosir lebih hemat."
-];
-
-// Data Awal Contoh (Realistic Student Data)
-const SAMPLE_TRANSACTIONS = [
-  {
-    id: 'tx-1',
-    type: 'income',
-    category: 'ortu',
-    amount: 1800000,
-    description: 'Kiriman Uang Saku Bulanan dari Ortu',
-    date: getFormattedDateOffset(-4),
-    createdAt: Date.now() - 345600000
-  },
-  {
-    id: 'tx-2',
-    type: 'expense',
-    category: 'kos',
-    amount: 650000,
-    description: 'Sewa Kamar Kos + Listrik',
-    date: getFormattedDateOffset(-3),
-    createdAt: Date.now() - 259200000
-  },
-  {
-    id: 'tx-3',
-    type: 'income',
-    category: 'asisten',
-    amount: 350000,
-    description: 'Honor Asisten Praktikum Algoritma',
-    date: getFormattedDateOffset(-2),
-    createdAt: Date.now() - 172800000
-  },
-  {
-    id: 'tx-4',
-    type: 'expense',
-    category: 'internet',
-    amount: 65000,
-    description: 'Paket Data Nugas 30GB',
-    date: getFormattedDateOffset(-2),
-    createdAt: Date.now() - 170000000
-  },
-  {
-    id: 'tx-5',
-    type: 'expense',
-    category: 'kuliah',
-    amount: 35000,
-    description: 'Fotokopi Diktat Kuliah & Print Laporan',
-    date: getFormattedDateOffset(-1),
-    createdAt: Date.now() - 86400000
-  },
-  {
-    id: 'tx-6',
-    type: 'expense',
-    category: 'makan',
-    amount: 18000,
-    description: 'Makan Siang Nasi Warteg Berkah',
-    date: getFormattedDateOffset(0),
-    createdAt: Date.now() - 36000000
-  },
-  {
-    id: 'tx-7',
-    type: 'expense',
-    category: 'nongkrong',
-    amount: 25000,
-    description: 'Kopi Susu nugas bareng tim kelompok',
-    date: getFormattedDateOffset(0),
-    createdAt: Date.now() - 12000000
-  }
+  "Makan di warteg boleh barbar, tapi sisihin dana darurat biar akhir bulan gak makan mie tiap hari!",
+  "Catat tiap beli es teh manis & fotokopi diktat. Bocor alus 5 ribuan bisa bikin kaget pas cek saldo!",
+  "Manfaatin wifi kampus dan perpustakaan buat ngirit kuota internet pas ngerjain tugas laporan.",
+  "Aturan simpel: Begitu dapet transferan ortu, langsung bayar kosan dulu sebelum khilaf nongkrong.",
+  "Beli deterjen dan galon bareng temen sekamar biar dapet harga grosir lebih hemat."
 ];
 
 // Helper Date Offset
@@ -116,6 +49,37 @@ function getFormattedDateOffset(offsetDays) {
   d.setDate(d.getDate() + offsetDays);
   return d.toISOString().split('T')[0];
 }
+
+// 3 Sampel Data Bawaan Mahasiswa (1 Pemasukan + 2 Pengeluaran)
+const SAMPLE_TRANSACTIONS = [
+  {
+    id: 'tx-1',
+    type: 'income',
+    category: 'ortu',
+    amount: 1500000,
+    description: 'Kiriman Uang Saku Bulanan dari Ortu',
+    date: getFormattedDateOffset(-3),
+    createdAt: Date.now() - 259200000
+  },
+  {
+    id: 'tx-2',
+    type: 'expense',
+    category: 'kos',
+    amount: 650000,
+    description: 'Bayar Kamar Kosan Bulan Ini',
+    date: getFormattedDateOffset(-2),
+    createdAt: Date.now() - 172800000
+  },
+  {
+    id: 'tx-3',
+    type: 'expense',
+    category: 'makan',
+    amount: 22000,
+    description: 'Ayam Geprek Sambal Bawang + Es Teh Jumbo',
+    date: getFormattedDateOffset(0),
+    createdAt: Date.now() - 36000000
+  }
+];
 
 // =============================================================================
 // App State
@@ -173,6 +137,13 @@ const confirmModal = document.getElementById('confirmModal');
 const modalCancelBtn = document.getElementById('modalCancelBtn');
 const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
+// Helper to safely trigger Lucide Icons creation
+function refreshIcons() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons();
+  }
+}
+
 // =============================================================================
 // Initialization
 // =============================================================================
@@ -186,22 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   renderApp();
   renderRandomQuote();
+  refreshIcons();
 });
 
-// Format today's date in Indonesian
+// Format hari & tanggal dalam Bahasa Indonesia
 function initDateDisplay() {
   const now = new Date();
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   currentDateDisplay.textContent = now.toLocaleDateString('id-ID', options);
 }
 
-// Random financial tips
+// Random tips mahasiswa
 function renderRandomQuote() {
   const randomIndex = Math.floor(Math.random() * STUDENT_QUOTES.length);
   studentQuote.textContent = `"${STUDENT_QUOTES[randomIndex]}"`;
 }
 
-// Theme handling (dark / light)
+// Theme handling (dark Slate / light)
 function initTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   if (savedTheme === 'light') {
@@ -219,13 +191,14 @@ function toggleTheme() {
     document.body.classList.remove('light-theme');
     document.body.classList.add('dark-theme');
     localStorage.setItem(THEME_STORAGE_KEY, 'dark');
-    showToast('Beralih ke Mode Gelap', 'info');
+    showToast('Beralih ke Dark Mode Slate 🌙', 'info');
   } else {
     document.body.classList.remove('dark-theme');
     document.body.classList.add('light-theme');
     localStorage.setItem(THEME_STORAGE_KEY, 'light');
-    showToast('Beralih ke Mode Terang', 'info');
+    showToast('Beralih ke Light Mode ☀️', 'info');
   }
+  refreshIcons();
 }
 
 // =============================================================================
@@ -236,13 +209,19 @@ function loadData() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) {
     try {
-      transactions = JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        transactions = parsed;
+      } else {
+        transactions = [...SAMPLE_TRANSACTIONS];
+        saveData();
+      }
     } catch (e) {
       console.error('Failed to parse stored transactions:', e);
       transactions = [...SAMPLE_TRANSACTIONS];
     }
   } else {
-    // First time visitor, load realistic sample data
+    // Pengguna pertama kali buka, masukkan tepat 3 data sampel bawaan mahasiswa
     transactions = [...SAMPLE_TRANSACTIONS];
     saveData();
   }
@@ -266,12 +245,11 @@ function formatRupiah(number) {
 
 function parseCurrencyInput(value) {
   if (!value) return 0;
-  // Strip all non-numeric characters
   const cleanStr = value.toString().replace(/[^0-9]/g, '');
   return cleanStr ? parseInt(cleanStr, 10) : 0;
 }
 
-// Format input box dynamically as user types
+// Format input secara dinamis saat diketik
 function handleAmountInputFormatting(e) {
   const rawNum = parseCurrencyInput(e.target.value);
   if (rawNum === 0) {
@@ -281,7 +259,7 @@ function handleAmountInputFormatting(e) {
   }
 }
 
-// Format date to Indonesian readable string: '1 Okt 2026'
+// Format tanggal ramah Indonesia: '1 Okt 2026'
 function formatIndonesianDate(dateString) {
   if (!dateString) return '-';
   const parts = dateString.split('-');
@@ -294,12 +272,12 @@ function formatIndonesianDate(dateString) {
   });
 }
 
-// Find category detail
+// Informasi kategori
 function getCategoryInfo(type, catId) {
   const list = CATEGORIES[type] || [];
   const found = list.find(c => c.id === catId);
   if (found) return found;
-  return { id: catId, label: 'Lainnya', icon: '🔖', color: '#64748b' };
+  return { id: catId, label: 'Lainnya', lucideIcon: 'tag', color: '#64748b' };
 }
 
 // =============================================================================
@@ -313,7 +291,7 @@ function populateCategorySelect(type, selectedCategory = '') {
   catList.forEach(item => {
     const option = document.createElement('option');
     option.value = item.id;
-    option.textContent = `${item.icon} ${item.label}`;
+    option.textContent = item.label;
     if (selectedCategory && selectedCategory === item.id) {
       option.selected = true;
     }
@@ -344,22 +322,22 @@ function updateDashboardOverview() {
 
   const totalBalance = totalIncome - totalExpense;
 
-  // Render text values
+  // Render teks angka
   totalBalanceDisplay.textContent = formatRupiah(totalBalance);
   totalIncomeDisplay.textContent = formatRupiah(totalIncome);
   totalExpenseDisplay.textContent = formatRupiah(totalExpense);
 
-  incomeCountBadge.textContent = `${incomeCount} Transaksi`;
+  incomeCountBadge.textContent = `${incomeCount} Pemasukan`;
 
-  // Balance status indicators
+  // Status indikator dompet mahasiswa
   if (totalBalance < 0) {
-    balanceStatusBadge.textContent = 'Saldo Minus / Defisit!';
+    balanceStatusBadge.textContent = 'Defisit / Boncos Banget! 🚨';
     balanceStatusBadge.className = 'status-indicator danger';
-  } else if (totalBalance < 200000 && totalIncome > 0) {
-    balanceStatusBadge.textContent = 'Peringatan: Kritis Menipis';
+  } else if (totalBalance < 150000 && totalIncome > 0) {
+    balanceStatusBadge.textContent = 'Siaga 1: Saldo Kritis ⚠️';
     balanceStatusBadge.className = 'status-indicator warning';
   } else {
-    balanceStatusBadge.textContent = 'Kondisi Saldo Aman';
+    balanceStatusBadge.textContent = 'Dompet Masih Sehat 😎';
     balanceStatusBadge.className = 'status-indicator';
   }
 
@@ -371,25 +349,25 @@ function updateDashboardOverview() {
     expenseRatio = 100;
   }
 
-  expenseRatioBadge.textContent = `${expenseRatio}% terpakai`;
+  expenseRatioBadge.textContent = `${expenseRatio}% kepake`;
   budgetPercentageText.textContent = `${expenseRatio}%`;
   budgetBarFill.style.width = `${Math.min(expenseRatio, 100)}%`;
 
   if (expenseRatio >= 90) {
-    budgetStatusText.textContent = 'Bahaya! Pengeluaranmu hampir habis / melebihi pemasukan';
+    budgetStatusText.textContent = 'Waduh! Duit saku udah ludes lebih dari 90%, ngerem jajan ya!';
     budgetBarFill.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
   } else if (expenseRatio >= 70) {
-    budgetStatusText.textContent = 'Perhatian! Sudah lebih dari 70% uang saku terpakai';
-    budgetBarFill.style.background = 'linear-gradient(90deg, #10b981, #f59e0b)';
+    budgetStatusText.textContent = 'Perhatian! Udah kepake 70% lebih, jangan kalap ngopi!';
+    budgetBarFill.style.background = 'linear-gradient(90deg, #8b5cf6, #f59e0b)';
   } else {
-    budgetStatusText.textContent = 'Bagus! Pengeluaran masih di bawah kontrol aman';
-    budgetBarFill.style.background = 'linear-gradient(90deg, #10b981, #38bdf8)';
+    budgetStatusText.textContent = 'Aman terkendali, santai dulu gak sih! Masih banyak cadangan.';
+    budgetBarFill.style.background = 'linear-gradient(90deg, #10b981, #8b5cf6)';
   }
 
-  // Calculate Daily Safe Spend for the rest of the month
+  // Hitung Jatah Belanja Aman Hari Ini
   calculateDailySafeBudget(totalBalance);
 
-  // Top Expense Categories summary
+  // Ringkasan Pos Pengeluaran Terbanyak
   updateTopCategoriesSummary();
 }
 
@@ -397,7 +375,6 @@ function calculateDailySafeBudget(totalBalance) {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
-  // Total days in current month
   const totalDays = new Date(year, month + 1, 0).getDate();
   const todayDate = now.getDate();
   const remainingDays = Math.max(1, (totalDays - todayDate) + 1);
@@ -419,12 +396,12 @@ function updateTopCategoriesSummary() {
 
   const sortedCategories = Object.keys(categoryTotals)
     .sort((a, b) => categoryTotals[b] - categoryTotals[a])
-    .slice(0, 4);
+    .slice(0, 3);
 
   topCategoriesContainer.innerHTML = '';
 
   if (sortedCategories.length === 0) {
-    topCategoriesContainer.innerHTML = `<span class="breakdown-tag">Belum ada data pengeluaran</span>`;
+    topCategoriesContainer.innerHTML = `<span class="breakdown-tag">Belum ada pengeluaran yang dicatat</span>`;
     return;
   }
 
@@ -433,7 +410,11 @@ function updateTopCategoriesSummary() {
     const amount = categoryTotals[catId];
     const tag = document.createElement('div');
     tag.className = 'breakdown-tag';
-    tag.innerHTML = `<span>${catInfo.icon} ${catInfo.label}:</span> <b>${formatRupiah(amount)}</b>`;
+    tag.innerHTML = `
+      <i data-lucide="${catInfo.lucideIcon}"></i>
+      <span>${catInfo.label.split('/')[0].trim()}:</span>
+      <b>${formatRupiah(amount)}</b>
+    `;
     topCategoriesContainer.appendChild(tag);
   });
 }
@@ -445,12 +426,13 @@ function updateTopCategoriesSummary() {
 function renderApp() {
   updateDashboardOverview();
   renderTransactionsList();
+  refreshIcons();
 }
 
 function getFilteredTransactions() {
   let list = [...transactions];
 
-  // 1. Filter Type (all, expense, income)
+  // 1. Filter Jenis Transaksi
   if (activeFilter !== 'all') {
     list = list.filter(item => item.type === activeFilter);
   }
@@ -490,17 +472,18 @@ function renderTransactionsList() {
   const list = getFilteredTransactions();
   transactionsContainer.innerHTML = '';
 
-  transactionSummaryCount.textContent = `${list.length} dari ${transactions.length} catatan`;
+  transactionSummaryCount.textContent = `${list.length} dari ${transactions.length} catatan tersimpan`;
 
   if (list.length === 0) {
     emptyState.classList.remove('hidden');
     if (searchQuery || activeFilter !== 'all') {
-      document.getElementById('emptyTitle').textContent = 'Tidak Ditemukan';
-      document.getElementById('emptyDesc').textContent = 'Coba ubah kata kunci pencarian atau ganti filter kategori.';
+      document.getElementById('emptyTitle').textContent = 'Gak Ketemu, Bestie!';
+      document.getElementById('emptyDesc').textContent = 'Coba cari kata kunci lain atau ubah filter kategorinya ya.';
     } else {
-      document.getElementById('emptyTitle').textContent = 'Belum Ada Transaksi';
-      document.getElementById('emptyDesc').textContent = 'Gunakan formulir di samping untuk mulai mencatat keuangan kuliahmu.';
+      document.getElementById('emptyTitle').textContent = 'Masih Sepi Nih, Bestie!';
+      document.getElementById('emptyDesc').textContent = 'Yuk catat jajan atau kiriman ortu pertama kamu pake form di samping.';
     }
+    refreshIcons();
     return;
   }
 
@@ -510,6 +493,8 @@ function renderTransactionsList() {
     const itemEl = createTransactionElement(tx);
     transactionsContainer.appendChild(itemEl);
   });
+
+  refreshIcons();
 }
 
 function createTransactionElement(tx) {
@@ -522,8 +507,8 @@ function createTransactionElement(tx) {
 
   item.innerHTML = `
     <div class="item-left">
-      <div class="item-icon-wrapper" style="background: ${cat.color}20; color: ${cat.color};">
-        ${cat.icon}
+      <div class="item-icon-wrapper" style="background: ${cat.color}20; color: ${cat.color}; border-color: ${cat.color}40;">
+        <i data-lucide="${cat.lucideIcon}"></i>
       </div>
       <div class="item-details">
         <span class="item-description" title="${escapeHtml(tx.description)}">${escapeHtml(tx.description)}</span>
@@ -543,16 +528,10 @@ function createTransactionElement(tx) {
       </div>
       <div class="item-actions">
         <button type="button" class="btn-item-action edit" title="Edit Transaksi" aria-label="Edit Transaksi" data-action="edit" data-id="${tx.id}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-          </svg>
+          <i data-lucide="edit-3"></i>
         </button>
         <button type="button" class="btn-item-action delete" title="Hapus Transaksi" aria-label="Hapus Transaksi" data-action="delete" data-id="${tx.id}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
+          <i data-lucide="trash-2"></i>
         </button>
       </div>
     </div>
@@ -574,7 +553,7 @@ function createTransactionElement(tx) {
   return item;
 }
 
-// Utility to escape HTML to prevent XSS
+// Utility to escape HTML
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
@@ -608,6 +587,13 @@ function setupEventListeners() {
       const selectedType = e.target.value;
       updateTypeRadioStyles(selectedType);
       populateCategorySelect(selectedType);
+      
+      // Update placeholder dynamically based on type
+      if (selectedType === 'income') {
+        descriptionInput.placeholder = 'Dapet duit dari mana nih? (contoh: Uang saku, gaji freelance)';
+      } else {
+        descriptionInput.placeholder = 'Abis jajan apa hari ini?';
+      }
     });
   });
 
@@ -704,21 +690,21 @@ function handleFormSubmit(e) {
   const description = descriptionInput.value.trim();
   const dateValue = dateInput.value;
 
-  // Validation
+  // Validasi ramah mahasiswa
   if (rawAmount <= 0) {
-    showToast('Harap masukkan nominal transaksi yang valid!', 'error');
+    showToast('Eits, nominalnya gak boleh nol atau kosong dong! 💸', 'error');
     amountInput.focus();
     return;
   }
 
   if (!description) {
-    showToast('Harap isi keterangan transaksi!', 'error');
+    showToast('Keterangannya diisi dulu ya, biar gak lupa abis jajan apa! 📝', 'error');
     descriptionInput.focus();
     return;
   }
 
   if (!dateValue) {
-    showToast('Harap pilih tanggal transaksi!', 'error');
+    showToast('Pilih tanggal transaksinya dulu ya!', 'error');
     dateInput.focus();
     return;
   }
@@ -738,7 +724,7 @@ function handleFormSubmit(e) {
       };
       saveData();
       renderApp();
-      showToast('Transaksi berhasil diperbarui!', 'success');
+      showToast('Sip! Catatan transaksi udah di-update 👍', 'success');
       resetForm();
     }
   } else {
@@ -756,7 +742,7 @@ function handleFormSubmit(e) {
     transactions.unshift(newTx);
     saveData();
     renderApp();
-    showToast('Transaksi baru berhasil dicatat!', 'success');
+    showToast('Mantap! Catatan baru udah berhasil disimpan ✨', 'success');
     resetForm();
   }
 }
@@ -765,15 +751,13 @@ function handleStartEdit(id) {
   const tx = transactions.find(t => t.id === id);
   if (!tx) return;
 
-  // Scroll to form on mobile/tablet smoothly
   transactionForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   editTransactionId.value = tx.id;
-  formTitle.textContent = 'Edit Transaksi';
-  submitBtnText.textContent = 'Perbarui Transaksi';
+  formTitle.textContent = 'Edit Catatan Transaksi ✏️';
+  submitBtnText.textContent = 'Perbarui Catatan 👍';
   cancelEditBtn.classList.remove('hidden');
 
-  // Set type radio
   const targetRadio = document.querySelector(`input[name="transactionType"][value="${tx.type}"]`);
   if (targetRadio) {
     targetRadio.checked = true;
@@ -781,25 +765,25 @@ function handleStartEdit(id) {
     populateCategorySelect(tx.type, tx.category);
   }
 
-  // Populate fields
   amountInput.value = new Intl.NumberFormat('id-ID').format(tx.amount);
   descriptionInput.value = tx.description;
   dateInput.value = tx.date;
 
   amountInput.focus();
-  showToast('Mode pengeditan aktif', 'info');
+  refreshIcons();
+  showToast('Mode edit aktif, sesuaikan nominal atau keterangannya ya', 'info');
 }
 
 function handleCancelEdit() {
   resetForm();
-  showToast('Pengeditan dibatalkan', 'info');
+  showToast('Pengeditan catatan dibatalkan', 'info');
 }
 
 function resetForm() {
   transactionForm.reset();
   editTransactionId.value = '';
-  formTitle.textContent = 'Catat Transaksi Baru';
-  submitBtnText.textContent = 'Simpan Transaksi';
+  formTitle.textContent = 'Catat Jajan / Duit Masuk ✍️';
+  submitBtnText.textContent = 'Simpan Catatan ✨';
   cancelEditBtn.classList.add('hidden');
 
   // Reset back to expense by default
@@ -807,10 +791,12 @@ function resetForm() {
   expenseRadio.checked = true;
   updateTypeRadioStyles('expense');
   populateCategorySelect('expense');
+  descriptionInput.placeholder = 'Abis jajan apa hari ini?';
 
   // Reset date to today
   dateInput.value = new Date().toISOString().split('T')[0];
   amountInput.value = '';
+  refreshIcons();
 }
 
 // =============================================================================
@@ -824,6 +810,7 @@ function promptDelete(id) {
     document.getElementById('modalDesc').textContent = `Hapus catatan "${tx.description}" (${formatRupiah(tx.amount)})?`;
   }
   confirmModal.classList.remove('hidden');
+  refreshIcons();
 }
 
 function closeDeleteModal() {
@@ -838,9 +825,8 @@ function confirmDeleteTransaction() {
   saveData();
   closeDeleteModal();
   renderApp();
-  showToast('Catatan transaksi telah dihapus', 'success');
+  showToast('Catatan berhasil dihapus, bestie! 🗑️', 'success');
 
-  // If was editing this item, cancel edit
   if (editTransactionId.value === transactionToDeleteId) {
     resetForm();
   }
@@ -852,9 +838,9 @@ function confirmDeleteTransaction() {
 
 function handleResetData() {
   const confirmAction = confirm(
-    "Pilihan Reset Data:\n" +
-    "- Klik OK untuk memuat ulang data contoh mahasiswa yang lengkap.\n" +
-    "- Klik BATAL untuk membatalkan."
+    "Mau balikin ke 3 data contoh bawaan mahasiswa?\n" +
+    "- Klik OK untuk memuat 3 sampel transaksi awal.\n" +
+    "- Klik BATAL untuk mempertahankan catatanmu."
   );
 
   if (confirmAction) {
@@ -862,20 +848,20 @@ function handleResetData() {
     saveData();
     resetForm();
     renderApp();
-    showToast('Data contoh mahasiswa berhasil dimuat ulang!', 'success');
+    showToast('Data contoh mahasiswa berhasil dimuat ulang! 🚀', 'success');
   }
 }
 
 function exportToCSV() {
   if (transactions.length === 0) {
-    showToast('Belum ada transaksi untuk diekspor', 'error');
+    showToast('Belum ada catatan untuk diekspor, bestie!', 'error');
     return;
   }
 
   const headers = ['ID', 'Tanggal', 'Jenis', 'Kategori', 'Keterangan', 'Nominal (Rp)'];
   const rows = transactions.map(t => {
     const catInfo = getCategoryInfo(t.type, t.category);
-    const typeLabel = t.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+    const typeLabel = t.type === 'income' ? 'Duit Masuk' : 'Duit Keluar';
     const cleanDesc = `"${(t.description || '').replace(/"/g, '""')}"`;
     const cleanCat = `"${(catInfo.label || '').replace(/"/g, '""')}"`;
     return [t.id, t.date, typeLabel, cleanCat, cleanDesc, t.amount].join(',');
@@ -888,39 +874,42 @@ function exportToCSV() {
   const link = document.createElement('a');
   const nowStr = new Date().toISOString().split('T')[0];
   link.setAttribute('href', url);
-  link.setAttribute('download', `catatan_keuangan_mahasiswa_${nowStr}.csv`);
+  link.setAttribute('download', `sisaberapa_keuangan_mahasiswa_${nowStr}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 
-  showToast('Catatan berhasil diekspor ke file CSV!', 'success');
+  showToast('File CSV berhasil diunduh, siap dicek di Excel! 📊', 'success');
 }
 
 // =============================================================================
-// Toast Notification
+// Toast Notification (Pojok Kanan Atas, Otomatis Hilang 3 Detik)
 // =============================================================================
 
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
 
-  let iconSvg = '';
+  let iconName = 'info';
+  let iconColor = '#8b5cf6';
   if (type === 'success') {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>`;
+    iconName = 'check-circle';
+    iconColor = '#10b981';
   } else if (type === 'error') {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-  } else {
-    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+    iconName = 'alert-circle';
+    iconColor = '#f43f5e';
   }
 
   toast.innerHTML = `
-    ${iconSvg}
+    <i data-lucide="${iconName}" style="color: ${iconColor};"></i>
     <span>${escapeHtml(message)}</span>
   `;
 
   toastContainer.appendChild(toast);
+  refreshIcons();
 
+  // Otomatis hilang dalam 3 detik
   setTimeout(() => {
     if (toast.parentNode === toastContainer) {
       toastContainer.removeChild(toast);
